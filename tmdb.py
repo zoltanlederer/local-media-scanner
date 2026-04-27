@@ -6,7 +6,7 @@ import requests
 from config import TMDB_API_KEY
 
 def test_connection():
-    """ Test API Connection """
+    """ Test the TMDB API connection and print the result. """
     url = "https://api.themoviedb.org/3/configuration"
 
     try:
@@ -17,3 +17,15 @@ def test_connection():
             print('Connection was not successful.')    
     except requests.exceptions.RequestException as error: 
         print(f"Something went wrong: {error}")
+
+
+def search_tmdb(title, media_type, year=''):
+    """ Search TMDB for a movie or TV show by title and optional year. Returns a dictionary or None. """
+    base_url = 'https://api.themoviedb.org/3/search/'   
+    try:
+        response = requests.get(base_url + media_type, params={"api_key": TMDB_API_KEY, "query": title, "year": year})
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as error: 
+        print(f"Something went wrong: {error}")
+        return None
