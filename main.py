@@ -4,7 +4,7 @@ Main entry point for the Local Media Scanner.
 
 import argparse
 from tmdb import test_connection, search_tmdb
-from utils import get_folders
+from utils import get_folders, clean_folder_name
 
 parser = argparse.ArgumentParser(description='Scan local media files')
 parser.add_argument('-f', '--folder', help='Select a folder for the scan')
@@ -13,8 +13,13 @@ root_folder = args.folder
 
 # test_connection()
 
-data = search_tmdb(title="The Dark Knight", media_type='movie', year='2008')
+# data = search_tmdb(title="The Dark Knight", media_type='movie', year='2008')
 # print(data)
 
 folders = get_folders(root_folder)
-print(folders)
+# print(folders)
+
+for folder in folders:
+    result = clean_folder_name(folder.name)
+    print(result)
+
