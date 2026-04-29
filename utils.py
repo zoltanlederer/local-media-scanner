@@ -4,7 +4,7 @@ Folder walking and name cleaning
 
 import re
 from pathlib import Path
-from config import IGNORED_FOLDERS
+from config import IGNORED_FOLDERS, MOVIE_GENRES, TV_GENRES
 
 def get_folders(root_folder):
     """
@@ -47,3 +47,19 @@ def clean_folder_name(folder_name):
     title = title.strip() # strip any remaining whitespace
 
     return {'title': title, 'year': year}
+
+
+def get_genre(genres, media_type):
+    """ Loop through the list of IDs, look each one up in the genre dictionary, and join the results into a string """
+    
+    if media_type == 'movie':
+        genre_list = MOVIE_GENRES
+    elif media_type == 'tv':
+        genre_list = TV_GENRES
+
+    genre_names = []
+
+    for genre in genres:
+        genre_names.append(genre_list.get(genre, 'Unknown')) # if TMDB returns an ID that we don't have in genre_list, it will return "Unknown"
+
+    return ', ' .join(genre_names)
