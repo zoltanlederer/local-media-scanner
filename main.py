@@ -5,8 +5,9 @@ Main entry point for the Local Media Scanner.
 import argparse
 import time
 import unicodedata
+import csv
 from tmdb import test_connection, search_tmdb
-from utils import get_folders, clean_folder_name
+from utils import get_folders, clean_folder_name, get_genre
 
 def process_folders(folders, media_type):
     """ Loops through folders, cleans each name, calls search_tmdb(), and returns two lists: matched and unmatched """
@@ -29,6 +30,25 @@ def process_folders(folders, media_type):
     return matched, unmatched
 
 
+def prepare_data(matched, media_type):    
+    """ Clean and reformat raw TMDB results — remove unwanted fields, rename keys, convert genre IDs to names, and add media type """
+    remove = {'adult', 'backdrop_path', 'original_language', 'popularity', 'poster_path', 'softcore', 'video', 'vote_average', 'vote_count'}
+    rename = {'id': 'tmdb_id', 'overview': 'description', 'genre_ids': 'genres'}
+
+    for data in matched:
+        data['genre_ids'] = get_genre(data['genre_ids'], media_type)
+        # remove unwanted keys
+        for item in remove:
+            data.pop(item)
+        # rename keys
+        for old_key, new_key in rename.items():
+            data[new_key] = data.pop(old_key)        
+        # add media type as a new field
+        data['type'] = media_type    
+    return matched
+        
+
+
 # --- CLI setup ---
 parser = argparse.ArgumentParser(description='Scan local media files')
 parser.add_argument('-f', '--folder', help='Select a folder for the scan')
@@ -39,7 +59,17 @@ media_type = args.media_type
 
 # --- Main execution ---
 folders = get_folders(root_folder)
-media_info = process_folders(folders, media_type)
+matched, unmatched = process_folders(folders, media_type)
+clean_data = prepare_data(matched, media_type)
 
-print('MATCHED', media_info[0])
-print('NOT MATCHED', media_info[1])
+# print('===>', clean_data)
+
+# print('MATCHED', media_info[0])
+# print('NOT MATCHED', media_info[1])
+
+# with open('matched.csv', 'w', newline='') as csvfile:
+#     fieldnames = media_info[0][0].keys()
+#     writer = csv.DictWriter(csvfile, fieldnames=fieldnames) 
+#     writer.writeheader()
+#     writer.writerows(media_info[0])
+
