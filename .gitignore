@@ -25,3 +25,6 @@ Thumbs.db
 
 # test data
 test_data/
+
+# csv exports folder
+exports/
