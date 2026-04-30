@@ -5,6 +5,7 @@ Main entry point for the Local Media Scanner.
 import argparse
 import time
 import unicodedata
+import os
 from tmdb import test_connection, search_tmdb
 from utils import get_folders, clean_folder_name, get_genre, save_to_csv
 
@@ -50,6 +51,38 @@ def prepare_data(matched, media_type):
     return matched
         
 
+def confirm_save(cleaned_matched, unmatched):
+    """ Ask the user to confirm before saving matched and unmatched results to CSV files. Checks if files already exist to avoid accidental overwriting. """
+    confirm = input(f'Do you want to save the results? \nIt will be saved as "matched.csv" and "unmatched.csv". \nTo confirm press "Enter", to quit "q": ')
+    saved = False
+    
+    if confirm == '':
+        if os.path.exists('matched.csv'):
+            overwrite = input(f'The "matched.csv" already exists. Press "Enter" to overwrite or "q" to quit: ')
+            if overwrite != 'q':
+                save_to_csv(cleaned_matched, 'matched.csv')  # save on overwrite confirmation
+                saved = True
+        else:
+            save_to_csv(cleaned_matched, 'matched.csv')  # save when file doesn't exist
+            saved = True
+
+        if os.path.exists('unmatched.csv'):
+            overwrite = input(f'The "unmatched.csv" already exists. Press "Enter" to overwrite or "q" to quit: ')
+            if overwrite != 'q':
+                save_to_csv(unmatched, 'unmatched.csv')
+                saved = True
+        else:
+            save_to_csv(unmatched, 'unmatched.csv')
+            saved = True
+    else:
+        print('Save cancelled.')
+        return
+
+    if saved:
+        print('💾 The results were saved.')
+    else:
+        print('Nothing was saved.')
+
 
 # --- CLI setup ---
 parser = argparse.ArgumentParser(description='Scan local media files')
@@ -62,17 +95,13 @@ media_type = args.media_type
 # --- Main execution ---
 folders = get_folders(root_folder)
 matched, unmatched = process_folders(folders, media_type)
-clean_data = prepare_data(matched, media_type)
-save_to_csv(clean_data, 'export.csv')
+cleaned_matched = prepare_data(matched, media_type)
 
-# print('===>', clean_data)
+print("-" * 50)
+print(f"Scan complete.")
+print(f"  Matched:   {len(matched)}")
+print(f"  Unmatched: {len(unmatched)}")
+print(f"  Total:     {len(matched) + len(unmatched)}")
+print("-" * 50)
 
-# print('MATCHED', media_info[0])
-# print('NOT MATCHED', media_info[1])
-
-# with open('matched.csv', 'w', newline='') as csvfile:
-#     fieldnames = media_info[0][0].keys()
-#     writer = csv.DictWriter(csvfile, fieldnames=fieldnames) 
-#     writer.writeheader()
-#     writer.writerows(media_info[0])
-
+confirm_save(cleaned_matched, unmatched)
