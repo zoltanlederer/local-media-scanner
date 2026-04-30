@@ -6,6 +6,7 @@ import argparse
 import time
 import unicodedata
 import os
+from pathlib import Path
 from tmdb import test_connection, search_tmdb
 from utils import get_folders, clean_folder_name, get_genre, save_to_csv
 
@@ -51,28 +52,29 @@ def prepare_data(matched, media_type):
     return matched
         
 
-def confirm_save(cleaned_matched, unmatched):
-    """ Ask the user to confirm before saving matched and unmatched results to CSV files. Checks if files already exist to avoid accidental overwriting. """
+def confirm_save(cleaned_matched, unmatched):    
+    """ Ask the user to confirm before saving matched and unmatched results to CSV files. Creates an exports folder if it doesn't exist, and checks if files already exist to avoid accidental overwriting. """
     confirm = input(f'Do you want to save the results? \nIt will be saved as "matched.csv" and "unmatched.csv". \nTo confirm press "Enter", to quit "q": ')
     saved = False
     
     if confirm == '':
-        if os.path.exists('matched.csv'):
+        Path('exports').mkdir(exist_ok=True) # create "exports" folder automatically if it doesn't exist
+        if os.path.exists('exports/matched.csv'):
             overwrite = input(f'The "matched.csv" already exists. Press "Enter" to overwrite or "q" to quit: ')
             if overwrite != 'q':
-                save_to_csv(cleaned_matched, 'matched.csv')  # save on overwrite confirmation
+                save_to_csv(cleaned_matched, 'exports/matched.csv')  # save on overwrite confirmation
                 saved = True
         else:
-            save_to_csv(cleaned_matched, 'matched.csv')  # save when file doesn't exist
+            save_to_csv(cleaned_matched, 'exports/matched.csv')  # save when file doesn't exist
             saved = True
 
-        if os.path.exists('unmatched.csv'):
+        if os.path.exists('exports/unmatched.csv'):
             overwrite = input(f'The "unmatched.csv" already exists. Press "Enter" to overwrite or "q" to quit: ')
             if overwrite != 'q':
-                save_to_csv(unmatched, 'unmatched.csv')
+                save_to_csv(unmatched, 'exports/unmatched.csv')
                 saved = True
         else:
-            save_to_csv(unmatched, 'unmatched.csv')
+            save_to_csv(unmatched, 'exports/unmatched.csv')
             saved = True
     else:
         print('Save cancelled.')
