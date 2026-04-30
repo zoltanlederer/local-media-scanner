@@ -3,6 +3,8 @@ Folder walking and name cleaning
 """
 
 import re
+import sys
+import csv
 from pathlib import Path
 from config import IGNORED_FOLDERS, MOVIE_GENRES, TV_GENRES
 
@@ -63,3 +65,19 @@ def get_genre(genres, media_type):
         genre_names.append(genre_list.get(genre, 'Unknown')) # if TMDB returns an ID that we don't have in genre_list, it will return "Unknown"
 
     return ', ' .join(genre_names)
+
+
+def save_to_csv(data, filename):
+    """ Save a list of dictionaries to a CSV file. Handles permission and OS errors gracefully. """
+    try:
+        with open(filename, 'w', newline='') as csvfile:
+            fieldnames = data[0].keys()
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames) 
+            writer.writeheader()
+            writer.writerows(data)
+    except PermissionError:
+        print(f'Permission denied. Could not write to "{filename}".')
+    except OSError as error:
+        print(f'Could not create file: {error}')
+    except Exception:
+        print('Something went wrong while writing the file.')
