@@ -3,7 +3,6 @@ Folder walking and name cleaning
 """
 
 import re
-import sys
 import csv
 from pathlib import Path
 from config import IGNORED_FOLDERS, MOVIE_GENRES, TV_GENRES
