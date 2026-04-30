@@ -5,16 +5,18 @@ Main entry point for the Local Media Scanner.
 import argparse
 import time
 import unicodedata
-import csv
 from tmdb import test_connection, search_tmdb
-from utils import get_folders, clean_folder_name, get_genre
+from utils import get_folders, clean_folder_name, get_genre, save_to_csv
 
 def process_folders(folders, media_type):
     """ Loops through folders, cleans each name, calls search_tmdb(), and returns two lists: matched and unmatched """
     matched = []
     unmatched = []
 
-    for folder in folders:
+    # for folder in folders:
+    total = len(folders)
+    for i, folder in enumerate(folders, start=1): # enumerate() gives both the index and the item at the same time
+        print(f"Scanning {i}/{total}: {folder.name}") # printing the current folder being scanned
         clean_folder = clean_folder_name(folder.name)
         time.sleep(0.25) # wait 250ms between calls
         title = unicodedata.normalize('NFC', clean_folder['title']) # normalize unicode characters to avoid encoding mismatches when searching TMDB        
@@ -61,6 +63,7 @@ media_type = args.media_type
 folders = get_folders(root_folder)
 matched, unmatched = process_folders(folders, media_type)
 clean_data = prepare_data(matched, media_type)
+save_to_csv(clean_data, 'export.csv')
 
 # print('===>', clean_data)
 
