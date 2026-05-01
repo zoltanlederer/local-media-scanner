@@ -7,7 +7,7 @@ import time
 import unicodedata
 import os
 from pathlib import Path
-from tmdb import test_connection, search_tmdb
+from tmdb import search_tmdb
 from utils import get_folders, clean_folder_name, get_genre, save_to_csv
 
 def process_folders(folders, media_type):
@@ -126,9 +126,9 @@ cleaned_matched = prepare_data(matched, media_type)
 
 print("-" * 50)
 print(f"Scan complete.")
-print(f"  Matched:   {len(matched)}")
+print(f"  Matched:   {len(cleaned_matched)}")
 print(f"  Unmatched: {len(unmatched)}")
-print(f"  Total:     {len(matched) + len(unmatched)}")
+print(f"  Total:     {len(cleaned_matched) + len(unmatched)}")
 print("-" * 50)
 
 confirm_save(cleaned_matched, unmatched)

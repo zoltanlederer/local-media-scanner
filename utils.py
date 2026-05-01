@@ -62,6 +62,8 @@ def get_genre(genres, media_type):
         genre_list = MOVIE_GENRES
     elif media_type == 'tv':
         genre_list = TV_GENRES
+    else:
+        return ''
 
     genre_names = []
 
