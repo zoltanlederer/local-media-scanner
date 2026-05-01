@@ -42,8 +42,8 @@ def process_folders(folders, media_type):
 
 def prepare_data(matched, media_type):    
     """ Clean and reformat raw TMDB results — remove unwanted fields, rename keys, convert genre IDs to names, and add media type """
-    remove = {'adult', 'backdrop_path', 'original_language', 'popularity', 'poster_path', 'softcore', 'video', 'vote_average', 'vote_count'}
-    rename = {'id': 'tmdb_id', 'overview': 'description', 'genre_ids': 'genres'}
+    remove = {'adult', 'backdrop_path', 'original_language', 'popularity', 'poster_path', 'softcore', 'video', 'vote_average', 'vote_count', 'origin_country'}
+    rename = {'id': 'tmdb_id', 'overview': 'description', 'genre_ids': 'genres', 'name': 'title', 'first_air_date': 'release_date', 'original_name': 'original_title' }
     
     for data in matched:
         data['genre_ids'] = get_genre(data['genre_ids'], media_type)
@@ -52,7 +52,8 @@ def prepare_data(matched, media_type):
             data.pop(item, None) # None as a default value so it doesn't crash if the key doesn't exist
         # rename keys
         for old_key, new_key in rename.items():
-            data[new_key] = data.pop(old_key)        
+            if old_key in data: # skip if the key doesn't exist
+                data[new_key] = data.pop(old_key)
         # add media type as a new field
         data['type'] = media_type
 
