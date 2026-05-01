@@ -10,12 +10,17 @@ from config import IGNORED_FOLDERS, MOVIE_GENRES, TV_GENRES
 def get_folders(root_folder):
     """
     Walk through all subfolders recursively, skip anything in the
-    IGNORED_FOLDERS list, and return a list of folder paths to process.
+    IGNORED_FOLDERS list and season folders detected via regex,
+    and return a list of folder paths to process.
     """
     folders = []
     for folder in Path(root_folder).rglob('*'):
-        if folder.is_dir() and folder.name.lower() not in [f.lower() for f in IGNORED_FOLDERS]:
-            folders.append(folder)
+        # Season folders (e.g. "Season 01", "Season 01 (2010–11)", "S01") are filtered here via regex, not in IGNORED_FOLDERS
+        if (folder.is_dir() 
+            and folder.name.lower() not in [f.lower() for f in IGNORED_FOLDERS]
+            and not re.match(r'^Season\s*\d*', folder.name, re.IGNORECASE)
+            and not re.match(r'^S\d{2}$', folder.name, re.IGNORECASE)):
+                folders.append(folder)
 
     return folders
 
