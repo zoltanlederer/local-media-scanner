@@ -49,7 +49,7 @@ def prepare_data(matched, media_type):
         data['genre_ids'] = get_genre(data['genre_ids'], media_type)
         # remove unwanted keys
         for item in remove:
-            data.pop(item)
+            data.pop(item, None) # None as a default value so it doesn't crash if the key doesn't exist
         # rename keys
         for old_key, new_key in rename.items():
             data[new_key] = data.pop(old_key)        
