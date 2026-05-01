@@ -11,7 +11,7 @@ from tmdb import test_connection, search_tmdb
 from utils import get_folders, clean_folder_name, get_genre, save_to_csv
 
 def process_folders(folders, media_type):
-    """ Loops through folders, cleans each name, calls search_tmdb(), and returns two lists: matched and unmatched """
+    """ Loops through folders, cleans each name, calls search_tmdb(), and returns two lists: matched and unmatched. Each result includes the original folder name as source_folder. """
     matched = []
     unmatched = []
 
@@ -25,11 +25,17 @@ def process_folders(folders, media_type):
         results = search_tmdb(title=title, year=clean_folder['year'], media_type=media_type)
 
         if results is None: # a connection failure adds the folder to unmatched rather than crashing the whole program
-            unmatched.append(clean_folder)
+            result = clean_folder
+            result['source_folder'] = folder.name # add original folder name
+            unmatched.append(result)
         elif results['results']:
-            matched.append(results['results'][0])
+            result = results['results'][0]
+            result['source_folder'] = folder.name # add original folder name
+            matched.append(result)
         else:
-            unmatched.append(clean_folder)
+            result = clean_folder
+            result['source_folder'] = folder.name # add original folder name
+            unmatched.append(result)
 
     return matched, unmatched
 
