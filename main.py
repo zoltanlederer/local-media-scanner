@@ -44,7 +44,7 @@ def prepare_data(matched, media_type):
     """ Clean and reformat raw TMDB results — remove unwanted fields, rename keys, convert genre IDs to names, and add media type """
     remove = {'adult', 'backdrop_path', 'original_language', 'popularity', 'poster_path', 'softcore', 'video', 'vote_average', 'vote_count'}
     rename = {'id': 'tmdb_id', 'overview': 'description', 'genre_ids': 'genres'}
-
+    
     for data in matched:
         data['genre_ids'] = get_genre(data['genre_ids'], media_type)
         # remove unwanted keys
@@ -54,8 +54,17 @@ def prepare_data(matched, media_type):
         for old_key, new_key in rename.items():
             data[new_key] = data.pop(old_key)        
         # add media type as a new field
-        data['type'] = media_type    
-    return matched
+        data['type'] = media_type
+
+    # deduplicate by tmdb_id
+    seen_ids = set()
+    unique_matched = []
+    for data in matched:
+        if data['tmdb_id'] not in seen_ids:
+            seen_ids.add(data['tmdb_id'])
+            unique_matched.append(data)
+
+    return unique_matched
         
 
 def confirm_save(cleaned_matched, unmatched):    
@@ -101,7 +110,9 @@ root_folder = args.folder
 media_type = args.media_type
 
 # --- Main execution ---
+print("Scanning folders, please wait...")
 folders = get_folders(root_folder)
+print(f"Found {len(folders)} folders to process.")
 matched, unmatched = process_folders(folders, media_type)
 cleaned_matched = prepare_data(matched, media_type)
 
