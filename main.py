@@ -15,7 +15,6 @@ def process_folders(folders, media_type):
     matched = []
     unmatched = []
 
-    # for folder in folders:
     total = len(folders)
     for i, folder in enumerate(folders, start=1): # enumerate() gives both the index and the item at the same time
         print(f"Scanning {i}/{total}: {folder.name}") # printing the current folder being scanned
@@ -33,9 +32,16 @@ def process_folders(folders, media_type):
             result['source_folder'] = folder.name # add original folder name
             matched.append(result)
         else:
-            result = clean_folder
-            result['source_folder'] = folder.name # add original folder name
-            unmatched.append(result)
+            # retry without year
+            results = search_tmdb(title=title, year=None, media_type=media_type)
+            if results and results['results']:
+                result = results['results'][0]
+                result['source_folder'] = folder.name # add original folder name
+                matched.append(result)
+            else:    
+                result = clean_folder
+                result['source_folder'] = folder.name # add original folder name
+                unmatched.append(result)
 
     return matched, unmatched
 
@@ -52,7 +58,8 @@ def prepare_data(matched, media_type):
             data.pop(item, None) # None as a default value so it doesn't crash if the key doesn't exist
         # rename keys
         for old_key, new_key in rename.items():
-            if old_key in data: # skip if the key doesn't exist
+            # skip if the key doesn't exist
+            if old_key in data:
                 data[new_key] = data.pop(old_key)
         # add media type as a new field
         data['type'] = media_type
